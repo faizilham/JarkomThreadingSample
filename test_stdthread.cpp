@@ -6,12 +6,18 @@
 		
 		Buffer queue maksimal 5 integer
 */
-
+// thread & mutex
 #include <thread>
 #include <mutex>
+
+// queue & vector
 #include <queue>
 #include <vector>
+
+// untuk printf
 #include <cstdio>
+
+// untuk random, usleep, dan time
 #include <cstdlib>
 #include <unistd.h>
 #include <time.h>

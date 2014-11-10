@@ -9,12 +9,20 @@
 
 // bisa juga dibuat versi C nya
 
+// untuk thread
 #include <pthread.h>
-#include <cstdlib>
+
+// queue
 #include <queue>
-#include <unistd.h>
-#include <time.h>   
+
+// untuk printf
 #include <cstdio>
+
+// untuk random, usleep, dan time
+#include <cstdlib>
+#include <unistd.h>
+#include <time.h>  
+
 
 using std::queue;
 
