@@ -1,5 +1,9 @@
 all:
-	g++ -o test_pthread test_pthread.cpp -lpthread
+	g++ -o run_pthread test_pthread.cpp -pthread
+	g++ -std=c++11 -o run_stdthread test_stdthread.cpp -pthread -Wl,--no-as-needed
 	
-run_pthread:
-	./test_pthread
+pthread:
+	./run_pthread
+	
+stdthread:
+	./run_stdthread

@@ -7,31 +7,35 @@
 		Buffer queue maksimal 5 integer
 */
 
-// bisa juga dibuat versi C nya
-
-#include <pthread.h>
-#include <cstdlib>
+#include <thread>
+#include <mutex>
 #include <queue>
-#include <unistd.h>
-#include <time.h>   
+#include <vector>
 #include <cstdio>
+#include <cstdlib>
+#include <unistd.h>
+#include <time.h>
 
 using std::queue;
+using std::thread;
+using std::mutex;
+using std::vector;
 
 queue<int> message;
 bool all;
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+mutex lock;
 
-void* producer(void* param){
+void producer(){
 	all = false;
 	for (int i = 0; i < 10; ++i){
 	
-		pthread_mutex_lock(&lock); // ambil lock
+		lock.lock(); // ambil lock
 		
 		// jika buffer masih cukup, tambahkan bilangan random
 		if (message.size() < 5)
 			message.push(rand() % 1000);
-		pthread_mutex_unlock(&lock); // lepas lock
+			
+		lock.unlock(); // lepas lock
 		
 		// sleep selama 0 - 999 milisekon (0 - 999000 nanosekon)
 		usleep((rand() % 1000) * 1000);
@@ -39,10 +43,10 @@ void* producer(void* param){
 	all = true;
 }
 
-void* consumer(void* param){
-	int id = (int) param; // konversi param menjadi int, yaitu id thread consumer
+void consumer(int id){
+	
 	while(!all){
-		pthread_mutex_lock(&lock); // ambil lock
+		lock.lock(); // ambil lock
 		
 		// jika ada bilangan dalam buffer, ambil lalu print
 		if (message.size() > 0){
@@ -50,7 +54,7 @@ void* consumer(void* param){
 			printf("thread %d: %d\n", id, m);
 		}
 		
-		pthread_mutex_unlock(&lock); // lepas lock
+		lock.unlock(); // lepas lock
 		
 		// sleep selama 500 milisekon (500000 nanosekon)
 		usleep(500 * 1000);
@@ -59,23 +63,20 @@ void* consumer(void* param){
 
 int main(){
 	srand(time(NULL));
-	pthread_t p, c[3];
+	vector<thread> c;
 	
-	// buat thread yang menjalankan producer(NULL)
-	if (pthread_create(&p, NULL, producer, NULL)){
-		exit(1);
-	}
+	// buat thread yang menjalankan producer()
+	thread p(producer);
 	
-	// buat 3 thread, masing2 menjalankan consumer((void*) i)
+	// buat 3 thread, masing2 menjalankan consumer(i)
 	for (int i = 0; i < 3; i++){
-		if (pthread_create(&c[i], NULL, consumer, (void*) i))
-			exit(1);
+		c.push_back(thread(consumer, i));
 	}
 	
-	pthread_join(p, NULL); // tunggu thread producer selesai
+	p.join();
 	
 	// tunggu thread consumer selesai	
 	for (int i = 0; i < 3; i++){
-		pthread_join(c[i], NULL);
+		c[i].join();
 	}
 }
